@@ -1,5 +1,6 @@
 package com.flutter_webview_plugin;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.net.Uri;
 import android.annotation.TargetApi;
@@ -209,6 +210,7 @@ class WebviewManager {
 
             }
 
+
             //For Android 5.0+
             public boolean onShowFileChooser(
                     WebView webView, ValueCallback<Uri[]> filePathCallback,
@@ -265,7 +267,9 @@ class WebviewManager {
                 callback.invoke(origin, true, false);
             }
         });
-        registerJavaScriptChannelNames(channelNames);
+
+        //registerJavaScriptChannelNames(channelNames);
+        registerJavaScriptChannel();
     }
 
     private Uri getOutputFilename(String intentType) {
@@ -352,6 +356,12 @@ class WebviewManager {
         webView.clearFormData();
     }
 
+    @SuppressLint("AddJavascriptInterface")
+    private void registerJavaScriptChannel() {
+        webView.addJavascriptInterface(new WebAppInterface(context), "externalApp");
+    }
+
+    @SuppressLint("AddJavascriptInterface")
     private void registerJavaScriptChannelNames(List<String> channelNames) {
         for (String channelName : channelNames) {
             webView.addJavascriptInterface(
