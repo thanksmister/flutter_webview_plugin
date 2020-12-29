@@ -1,28 +1,34 @@
-package com.flutter_webview_plugin;
+package android.src.main.java.com.flutter_webview_plugin;
 
-import android.content.Context;
 import android.webkit.JavascriptInterface;
-import android.widget.Toast;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 class WebAppInterface {
 
-    Context mContext;
-
-    /** Instantiate the interface and set the context */
-    WebAppInterface(Context c) {
-        mContext = c;
-    }
-
-    /** Show a toast from the web page */
+    /**
+     * Show a toast from the web page
+     */
     @JavascriptInterface
     public void showToast(String toast) {
-        Toast.makeText(mContext, toast, Toast.LENGTH_SHORT).show();
+        //Toast.makeText(mContext, toast, Toast.LENGTH_SHORT).show();
     }
 
     @JavascriptInterface
     public void getExternalAuth(String payload) {
-        if(!payload.isEmpty()) {
-            FlutterWebviewPlugin.channel.invokeMethod("getExternalAuth", null);
+        try {
+            JSONObject json = new JSONObject(payload);
+            if (json != null) {
+                boolean force = false;
+                if (json.has("force")) {
+                    force = json.getBoolean("force");
+                }
+                FlutterWebviewPlugin.channel.invokeMethod("getExternalAuth", force);
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+            //Toast.makeText(mContext, "Error handling external auth method.", Toast.LENGTH_SHORT).show();
         }
     }
 }

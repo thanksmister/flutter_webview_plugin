@@ -1,4 +1,4 @@
-package com.flutter_webview_plugin;
+package android.src.main.java.com.flutter_webview_plugin;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
@@ -14,6 +14,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.CookieManager;
 import android.webkit.GeolocationPermissions;
+import android.webkit.JavascriptInterface;
 import android.webkit.SslErrorHandler;
 import android.webkit.ValueCallback;
 import android.webkit.WebChromeClient;
@@ -26,6 +27,10 @@ import androidx.core.content.FileProvider;
 
 import android.database.Cursor;
 import android.provider.OpenableColumns;
+import android.widget.Toast;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.List;
 import java.util.ArrayList;
@@ -125,6 +130,7 @@ class WebviewManager {
     Activity activity;
     BrowserClient webViewClient;
     ResultHandler resultHandler;
+    WebAppInterface webAppInterface;
     Context context;
     private boolean ignoreSSLErrors = false;
 
@@ -133,6 +139,7 @@ class WebviewManager {
         this.activity = activity;
         this.context = context;
         this.resultHandler = new ResultHandler();
+        this.webAppInterface = new WebAppInterface();
         this.platformThreadHandler = new Handler(context.getMainLooper());
         webViewClient = new BrowserClient() {
             @Override
@@ -268,7 +275,7 @@ class WebviewManager {
             }
         });
 
-        //registerJavaScriptChannelNames(channelNames);
+        registerJavaScriptChannelNames(channelNames);
         registerJavaScriptChannel();
     }
 
@@ -358,7 +365,7 @@ class WebviewManager {
 
     @SuppressLint("AddJavascriptInterface")
     private void registerJavaScriptChannel() {
-        webView.addJavascriptInterface(new WebAppInterface(context), "externalApp");
+        webView.addJavascriptInterface(webAppInterface, "externalApp");
     }
 
     @SuppressLint("AddJavascriptInterface")
@@ -565,3 +572,5 @@ class WebviewManager {
         }
     }
 }
+
+
