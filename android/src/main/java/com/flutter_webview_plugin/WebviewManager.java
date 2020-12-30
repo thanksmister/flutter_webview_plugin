@@ -1,54 +1,44 @@
 package com.flutter_webview_plugin;
 
 import android.annotation.SuppressLint;
-import android.content.Intent;
-import android.net.Uri;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
+import android.database.Cursor;
+import android.net.Uri;
 import android.net.http.SslError;
 import android.os.Build;
 import android.os.Handler;
+import android.provider.MediaStore;
+import android.provider.OpenableColumns;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.CookieManager;
 import android.webkit.GeolocationPermissions;
-import android.webkit.JavascriptInterface;
 import android.webkit.SslErrorHandler;
 import android.webkit.ValueCallback;
 import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.widget.FrameLayout;
-import android.provider.MediaStore;
 
 import androidx.core.content.FileProvider;
 
-import android.database.Cursor;
-import android.provider.OpenableColumns;
-import android.widget.Toast;
-
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.util.List;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
 import java.io.File;
-import java.util.Date;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
 
 import static android.app.Activity.RESULT_OK;
-
-/**
- * Created by lejard_h on 20/12/2017.
- */
 
 class WebviewManager {
 
@@ -130,7 +120,6 @@ class WebviewManager {
     Activity activity;
     BrowserClient webViewClient;
     ResultHandler resultHandler;
-    WebAppInterface webAppInterface;
     Context context;
     private boolean ignoreSSLErrors = false;
 
@@ -139,7 +128,6 @@ class WebviewManager {
         this.activity = activity;
         this.context = context;
         this.resultHandler = new ResultHandler();
-        this.webAppInterface = new WebAppInterface();
         this.platformThreadHandler = new Handler(context.getMainLooper());
         webViewClient = new BrowserClient() {
             @Override
@@ -275,8 +263,8 @@ class WebviewManager {
             }
         });
 
-        registerJavaScriptChannelNames(channelNames);
-        registerJavaScriptChannel();
+        //registerJavaScriptChannelNames(channelNames);
+        registerJavaScriptChannelInterface(channelNames, "externalApp");
     }
 
     private Uri getOutputFilename(String intentType) {
@@ -364,17 +352,19 @@ class WebviewManager {
     }
 
     @SuppressLint("AddJavascriptInterface")
-    private void registerJavaScriptChannel() {
-        webView.addJavascriptInterface(webAppInterface, "externalApp");
+    private void registerJavaScriptChannelInterface(List<String> channelNames, String interfaceName) {
+        for (String channelName : channelNames) {
+            webView.addJavascriptInterface(new WebAppInterface(FlutterWebviewPlugin.channel, channelName, platformThreadHandler), interfaceName);
+        }
     }
 
-    @SuppressLint("AddJavascriptInterface")
+    /*@SuppressLint("AddJavascriptInterface")
     private void registerJavaScriptChannelNames(List<String> channelNames) {
         for (String channelName : channelNames) {
             webView.addJavascriptInterface(
                     new JavaScriptChannel(FlutterWebviewPlugin.channel, channelName, platformThreadHandler), channelName);
         }
-    }
+    }*/
 
     void openUrl(
             boolean withJavascript,

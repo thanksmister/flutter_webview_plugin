@@ -1,43 +1,51 @@
 package com.flutter_webview_plugin;
 
+import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
 import android.webkit.JavascriptInterface;
+import java.util.HashMap;
 
-import org.json.JSONException;
-import org.json.JSONObject;
+import io.flutter.plugin.common.MethodChannel;
 
 class WebAppInterface {
 
-    private Handler uiThreadHandler = new Handler(Looper.getMainLooper());
+    private final String javaScriptChannelName;
+    private final MethodChannel methodChannel;
+    private final Handler platformThreadHandler;
 
     /**
-     * Show a toast from the web page
+     * @param channel the Flutter WebView method channel to which JS messages are sent
+     * @param channelName the name of the JavaScript channel, this is sent over the method
+     *     channel with each message to let the Dart code know which JavaScript channel the message
+     *     was sent through
      */
-    @JavascriptInterface
-    public void showToast(String toast) {
-        //Toast.makeText(mContext, toast, Toast.LENGTH_SHORT).show();
+    WebAppInterface(MethodChannel channel, String channelName, Handler handler) {
+        platformThreadHandler = handler;
+        methodChannel = channel;
+        javaScriptChannelName = channelName;
     }
 
+    /**
+     * Interface method called from the loaded page
+     * @param payload the payload sent from the javascript method on the loaded page
+     */
     @JavascriptInterface
     public void getExternalAuth(final String payload) {
-        new Handler(Looper.getMainLooper()).post(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    JSONObject json = new JSONObject(payload);
-                    if (json != null) {
-                        boolean force = false;
-                        if (json.has("force")) {
-                            force = json.getBoolean("force");
-                        }
-                        FlutterWebviewPlugin.channel.invokeMethod("getExternalAuth", force);
+        Runnable postMessageRunnable =
+                new Runnable() {
+                    @Override
+                    public void run() {
+                        HashMap<String, String> arguments = new HashMap<>();
+                        arguments.put("channel", javaScriptChannelName);
+                        arguments.put("message", payload);
+                        methodChannel.invokeMethod("javascriptChannelMessage", arguments);
                     }
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                    //Toast.makeText(mContext, "Error handling external auth method.", Toast.LENGTH_SHORT).show();
-                }
-            }
-        });
+                };
+        if (platformThreadHandler.getLooper() == Looper.myLooper()) {
+            postMessageRunnable.run();
+        } else {
+            platformThreadHandler.post(postMessageRunnable);
+        }
     }
 }
