@@ -1,6 +1,5 @@
 package com.flutter_webview_plugin;
 
-import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
 import android.webkit.JavascriptInterface;

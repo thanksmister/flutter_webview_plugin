@@ -123,7 +123,7 @@ class WebviewManager {
     Context context;
     private boolean ignoreSSLErrors = false;
 
-    WebviewManager(final Activity activity, final Context context, final List<String> channelNames) {
+    WebviewManager(final Activity activity, final Context context, final List<String> channelNames, final String interfaceName) {
         this.webView = new ObservableWebView(activity);
         this.activity = activity;
         this.context = context;
@@ -264,7 +264,7 @@ class WebviewManager {
         });
 
         //registerJavaScriptChannelNames(channelNames);
-        registerJavaScriptChannelInterface(channelNames, "externalApp");
+        registerJavaScriptChannelInterface(channelNames, interfaceName);
     }
 
     private Uri getOutputFilename(String intentType) {
