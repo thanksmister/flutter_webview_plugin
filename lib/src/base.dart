@@ -145,6 +145,7 @@ class FlutterWebviewPlugin {
     String url, {
     Map<String, String> headers,
     Set<JavascriptChannel> javascriptChannels,
+    String interfaceName,
     bool withJavascript,
     bool clearCache,
     bool clearCookies,
@@ -167,10 +168,11 @@ class FlutterWebviewPlugin {
     String invalidUrlRegex,
     bool geolocationEnabled,
     bool debuggingEnabled,
-    bool ignoreSSLErrors,
+    bool ignoreSSLErrors
   }) async {
     final args = <String, dynamic>{
       'url': url,
+      'interfaceName': interfaceName ?? "",
       'withJavascript': withJavascript ?? true,
       'clearCache': clearCache ?? false,
       'hidden': hidden ?? false,
@@ -192,7 +194,7 @@ class FlutterWebviewPlugin {
       'geolocationEnabled': geolocationEnabled ?? false,
       'withOverviewMode': withOverviewMode ?? false,
       'debuggingEnabled': debuggingEnabled ?? false,
-      'ignoreSSLErrors': ignoreSSLErrors ?? false,
+      'ignoreSSLErrors': ignoreSSLErrors ?? true,
     };
 
     if (headers != null) {
@@ -210,6 +212,8 @@ class FlutterWebviewPlugin {
         _javascriptChannels.clear();
       }
     }
+
+    args['javascriptInterfaceName'] = args["interfaceName"];
 
     args['javascriptChannelNames'] =
         _extractJavascriptChannelNames(javascriptChannels).toList();

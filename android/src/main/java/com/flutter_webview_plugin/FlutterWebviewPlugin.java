@@ -31,6 +31,7 @@ public class FlutterWebviewPlugin implements MethodCallHandler, PluginRegistry.A
     static MethodChannel channel;
     private static final String CHANNEL_NAME = "flutter_webview_plugin";
     private static final String JS_CHANNEL_NAMES_FIELD = "javascriptChannelNames";
+    private static final String JS_INTERFACE_NAME = "javascriptInterfaceName";
 
     public static void registerWith(PluginRegistry.Registrar registrar) {
         if (registrar.activity() != null) {
@@ -111,6 +112,7 @@ public class FlutterWebviewPlugin implements MethodCallHandler, PluginRegistry.A
         String url = call.argument("url");
         String userAgent = call.argument("userAgent");
         boolean withJavascript = call.argument("withJavascript");
+        String interfaceName = call.argument("interfaceName");
         boolean clearCache = call.argument("clearCache");
         boolean clearCookies = call.argument("clearCookies");
         boolean mediaPlaybackRequiresUserGesture = call.argument("mediaPlaybackRequiresUserGesture");
@@ -135,7 +137,7 @@ public class FlutterWebviewPlugin implements MethodCallHandler, PluginRegistry.A
             if (arguments.containsKey(JS_CHANNEL_NAMES_FIELD)) {
                 channelNames = (List<String>) arguments.get(JS_CHANNEL_NAMES_FIELD);
             }
-            webViewManager = new WebviewManager(activity, context, channelNames);
+            webViewManager = new WebviewManager(activity, context, channelNames, interfaceName);
         }
 
         FrameLayout.LayoutParams params = buildLayoutParams(call);
